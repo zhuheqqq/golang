@@ -24,6 +24,15 @@
         - [切片拷贝](#切片拷贝)
         - [slice遍历](#slice遍历)
         - [string底层就是一个byte的数组，可以进行切片操作](#string底层就是一个byte的数组可以进行切片操作)
+      - [8)、指针](#8指针)
+        - [对变量取地址操作](#对变量取地址操作)
+        - [空指针](#空指针)
+        - [new和make](#new和make)
+      - [9)、Map](#9map)
+        - [判断某个键是否存在](#判断某个键是否存在)
+        - [map遍历](#map遍历)
+        - [删除键值对](#删除键值对)
+        - [元素类型为map类型的切片](#元素类型为map类型的切片)
     - [(3)、init函数和main函数](#3init函数和main函数)
     - [(4)、内置打印函数详解](#4内置打印函数详解)
     - [(5)、下划线](#5下划线)
@@ -538,6 +547,198 @@ func main() {
     s = append(s, '!')
     str = string(s)
     fmt.Println(str)
+}
+```
+
+#### 8)、指针
+
+**go语言中的指针不能进行便宜和运算，是安全指针。**
+
+##### 对变量取地址操作
+
+```go
+ptr:=&v
+/*v是被取地址的变量
+ptr是用于接收地址的变量，ptr类型为*T
+*/
+```
+
+**和c中一样，&取出地址，*根据地址取出地址指向的值。**
+
+```go
+func modify1(x int){
+	x=100
+}
+
+func modify2(x *int){
+    *x=100
+}
+
+func main(){
+    a:=10
+    modify1(a)
+    fmt.Println(a)//10
+    modify2(&a)
+    fmt.Println(a)//100
+    
+}
+```
+
+##### 空指针
+
+当一个指针被定义后没有分配到任何变量，它的值为nil
+
+##### new和make
+
+new是一个内置的函数，不太常用，自动初始化为0值
+
+```go
+func new(Type) *Type
+/*Type是类型也是new接受的唯一的参数，new函数返回一个指向该类型内存地址的指针
+```
+
+```go
+//false
+func main(){
+    var a *int
+    *a=100
+}
+
+//true
+func main(){
+    var a *int
+    a=new(int)
+    *a=10
+    
+}
+```
+
+make也用于内存分配，但是只用于slice、map、chan的内存创建，返回的类型就是这三个类型本身
+
+```go
+func main(){
+    var b map[string]int
+    b=make(map[string]int,10)//10为创建的大小
+    b["111"]=100
+}
+```
+
+#### 9)、Map
+
+**map是一种无序的基于key-value的数据结构，Go语言中的map是引用类型，必须初始化才能使用。**
+
+map类型变量默认初始值为nil,需要使用make函数分配
+
+```go
+func main() {
+    scoreMap := make(map[string]int, 8)
+    scoreMap["张三"] = 90
+    scoreMap["小明"] = 100
+    fmt.Println(scoreMap)
+    fmt.Println(scoreMap["小明"])
+    fmt.Printf("type of a:%T\n", scoreMap)
+}
+
+/*输出
+map[小明:100 张三:90]
+100
+type of a:map[string]int
+*/
+```
+
+map也可以在声明的时候填充元素
+
+```go
+func main() {
+    userInfo := map[string]string{
+        "username": "pprof.cn",
+        "password": "123456",
+    }
+    fmt.Println(userInfo) //
+}
+```
+
+##### 判断某个键是否存在
+
+go语言中有判断map中键是否存在的特殊写法
+
+```go
+value,ok:=map[key]
+```
+
+```go
+func main() {
+    scoreMap := make(map[string]int)
+    scoreMap["张三"] = 90
+    scoreMap["小明"] = 100
+    // 如果key存在ok为true,v为对应的值；不存在ok为false,v为值类型的零值
+    v, ok := scoreMap["张三"]
+    if ok {
+        fmt.Println(v)
+    } else {
+        fmt.Println("查无此人")
+    }
+}
+```
+
+##### map遍历
+
+**使用for range遍历map**
+
+```go
+func main() {
+    scoreMap := make(map[string]int)
+    scoreMap["张三"] = 90
+    scoreMap["小明"] = 100
+    scoreMap["王五"] = 60
+    for k, v := range scoreMap {
+        fmt.Println(k, v)
+    }
+}
+```
+
+如果只想遍历key
+
+```go
+func main() {
+    scoreMap := make(map[string]int)
+    scoreMap["张三"] = 90
+    scoreMap["小明"] = 100
+    scoreMap["王五"] = 60
+    for k := range scoreMap {
+        fmt.Println(k)
+    }
+}
+```
+
+**注意： 遍历map时的元素顺序与添加键值对的顺序无关。**
+
+##### 删除键值对
+
+```go
+delete(map,key)
+/*map是要删除键值对的map
+key是要删除键值对的键
+*/
+```
+
+##### 元素类型为map类型的切片
+
+```go
+func main() {
+    var mapSlice = make([]map[string]string, 3)
+    for index, value := range mapSlice {
+        fmt.Printf("index:%d value:%v\n", index, value)
+    }
+    fmt.Println("after init")
+    // 对切片中的map元素进行初始化
+    mapSlice[0] = make(map[string]string, 10)
+    mapSlice[0]["name"] = "王五"
+    mapSlice[0]["password"] = "123456"
+    mapSlice[0]["address"] = "红旗大街"
+    for index, value := range mapSlice {
+        fmt.Printf("index:%d value:%v\n", index, value)
+    }
 }
 ```
 
