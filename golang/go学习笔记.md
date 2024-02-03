@@ -636,6 +636,7 @@ func main(){
 #### 9)、Map
 
 **map是一种无序的基于key-value的数据结构，Go语言中的map是引用类型，必须初始化才能使用。**
+**map 是 Go 内建的关联数据类型 （在一些其他的语言中也被称为 哈希(hash) 或者 字典(dict) ）**
 
 ```go
 map[KeyType]ValueType
