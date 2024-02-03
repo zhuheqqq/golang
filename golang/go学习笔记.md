@@ -33,6 +33,16 @@
         - [map遍历](#map遍历)
         - [删除键值对](#删除键值对)
         - [元素类型为map类型的切片](#元素类型为map类型的切片)
+        - [值为切片类型的map](#值为切片类型的map)
+      - [10)、结构体](#10结构体)
+        - [自定义类型](#自定义类型)
+        - [结构体实例化](#结构体实例化)
+        - [匿名结构体](#匿名结构体)
+        - [使用new创建指针类型结构体](#使用new创建指针类型结构体)
+        - [使用\&对结构体取地址=new了一次](#使用对结构体取地址new了一次)
+        - [当值拷贝性能开销大考虑为结构体添加构造函数](#当值拷贝性能开销大考虑为结构体添加构造函数)
+        - [嵌套结构体](#嵌套结构体)
+        - [结构体中的继承](#结构体中的继承)
     - [(3)、init函数和main函数](#3init函数和main函数)
     - [(4)、内置打印函数详解](#4内置打印函数详解)
     - [(5)、下划线](#5下划线)
@@ -627,6 +637,14 @@ func main(){
 
 **map是一种无序的基于key-value的数据结构，Go语言中的map是引用类型，必须初始化才能使用。**
 
+```go
+map[KeyType]ValueType
+/*
+KeyType:键的类型
+ValueType:键对应的值的类型
+*/
+```
+
 map类型变量默认初始值为nil,需要使用make函数分配
 
 ```go
@@ -741,6 +759,210 @@ func main() {
     }
 }
 ```
+
+##### 值为切片类型的map
+
+```go
+func main() {
+    var sliceMap = make(map[string][]string, 3)
+    fmt.Println(sliceMap)
+    fmt.Println("after init")
+    key := "中国"
+    value, ok := sliceMap[key]
+    if !ok {
+        value = make([]string, 0, 2)
+    }
+    value = append(value, "北京", "上海")
+    sliceMap[key] = value
+    fmt.Println(sliceMap)
+}
+```
+
+#### 10)、结构体
+
+##### 自定义类型
+
+```go
+//将MyInt定义为int类型
+ type MyInt int
+```
+
+**类型别名：**
+
+```go
+type byte=uint8
+type rune=int32
+```
+
+两者之间的区别：
+
+```go
+//类型定义
+type NewInt int
+
+//类型别名
+type MyInt = int
+
+func main() {
+    var a NewInt
+    var b MyInt
+
+    fmt.Printf("type of a:%T\n", a) //type of a:main.NewInt
+    fmt.Printf("type of b:%T\n", b) //type of b:int
+}
+```
+
+##### 结构体实例化
+
+可以通过var关键字声明结构体类型
+
+```go
+var 结构体实例 结构体类型
+```
+
+```go
+type person struct {
+    name string
+    city string
+    age  int8
+}
+
+func main() {
+    var p1 person
+    p1.name = "pprof.cn"
+    p1.city = "北京"
+    p1.age = 18
+    fmt.Printf("p1=%v\n", p1)  //p1={pprof.cn 北京 18}
+    fmt.Printf("p1=%#v\n", p1) //p1=main.person{name:"pprof.cn", city:"北京", age:18}
+}
+```
+
+##### 匿名结构体
+
+```go
+package main
+
+import (
+    "fmt"
+)
+
+func main() {
+    var user struct{Name string; Age int}
+    user.Name = "pprof.cn"
+    user.Age = 18
+    fmt.Printf("%#v\n", user)
+}
+```
+
+##### 使用new创建指针类型结构体
+
+```go
+var p2=new(person)
+fmt.Printf("%T\n",p2)//*main.person-->结构体指针
+fmt.Printf("p2=%#v\n",p2)
+```
+
+在go中支持对结构体指针直接使用.操作符来访问结构体成员，也就是可以：
+
+```go
+p2.name = "测试"
+p2.age = 88
+p2.city = "北京"
+```
+
+##### 使用&对结构体取地址=new了一次
+
+`p3 := &person{}`
+
+##### 当值拷贝性能开销大考虑为结构体添加构造函数
+
+```go
+func newPerson(name, city string, age int8) *person {
+    return &person{
+        name: name,
+        city: city,
+        age:  age,
+    }
+}
+//函数返回为结构体指针类型
+```
+
+调用构造函数
+
+```go
+p9 := newPerson("pprof.cn", "测试", 90)
+fmt.Printf("%#v\n", p9)
+```
+
+##### 嵌套结构体
+
+一个结构体中可以嵌套包含另一个结构体或结构体指针。
+
+```go
+// Address 地址结构体
+type Address struct {
+   Province string
+   City     string
+}
+
+// User 用户结构体
+type User struct {
+   Name    string
+   Gender  string
+   Address Address
+}
+
+func main() {
+   user1 := User{
+      Name:   "yyy",
+      Gender: "女",
+      Address: Address{
+         Province: "黑龙江",
+         City:     "哈尔滨",
+      },
+   }
+   fmt.Printf("user1=%#v\n", user1) 
+//user1=main.User{Name:"yyy", Gender:"女", Address:main.Address{Province:"黑龙江", City:"哈尔滨"}}
+}
+```
+
+##### 结构体中的继承
+
+go的结构体也可以实现面向对象的继承，通过嵌套匿名结构体实现：
+
+```go
+// Animal 动物
+type Animal struct {
+   name string
+}
+
+// Dog 狗
+type Dog struct {
+   Feet    int8
+   *Animal //通过嵌套匿名结构体实现继承
+}
+
+func (a *Animal) move() {
+   fmt.Printf("%s会动！\n", a.name)
+}
+
+func (d *Dog) wang() {
+   fmt.Printf("%s会汪汪汪~\n", d.name)
+}
+
+func main() {
+   d1 := &Dog{
+      Feet: 4,
+      Animal: &Animal{ //注意嵌套的是结构体指针
+         name: "乐乐",
+      },
+   }
+   d1.wang() //乐乐会汪汪汪~
+   d1.move() //乐乐会动！
+}
+```
+
+
 
 ### (3)、init函数和main函数
 
