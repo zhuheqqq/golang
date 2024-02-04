@@ -1,5 +1,14 @@
 # go语言流程控制
 
+- [go语言流程控制](#go语言流程控制)
+  - [switch](#switch)
+  - [selete](#selete)
+    - [超时判断](#超时判断)
+    - [退出](#退出)
+    - [判断channel是否阻塞](#判断channel是否阻塞)
+  - [range](#range)
+
+
 此篇笔记主要是针对go语言与c、cpp流程控制不同之处，相同之处不再赘述。
 
 ## switch
