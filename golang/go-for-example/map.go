@@ -3,15 +3,21 @@ package main
 import "fmt"
 
 func main() {
-	var sliceMap = make(map[string][]string, 3)
-	fmt.Println(sliceMap)
-	fmt.Println("after init")
-	key := "中国"
-	value, ok := sliceMap[key]
-	if !ok {
-		value = make([]string, 0, 2)
-	}
-	value = append(value, "北京", "上海")
-	sliceMap[key] = value
-	fmt.Println(sliceMap)
+	m := make(map[string]int)
+
+	m["k1"] = 7
+	m["k2"] = 13
+
+	fmt.Println("map:", m)
+
+	v1 := m["k1"]
+	fmt.Println("v1:", v1)
+	fmt.Println("len:", len(m))
+
+	delete(m, "k2")
+	fmt.Println("map:", m)
+
+	_, prs := m["k2"]
+	fmt.Println("prs:", prs)
+
 }
